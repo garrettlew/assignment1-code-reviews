@@ -5,153 +5,209 @@ at # YOUR CODE HERE. Keep signatures. See README.md and INTERFACE.md.
 Functions must not mutate inputs, prompt for input, or perform network I/O.
 Only code inside the main guard should save/show figures.
 """
+
 import numpy as np
-
-
-# PART 1 (20 points), Q1: Show computations for the given A and B.
-# YOUR ANSWER HERE
-def matrix_operations(A=None, B=None):
-    """Return AB, BA, (A+B).T, A@B.T, trace(A), trace(AB).
-
-    Defaults: A=[[3,4],[2,1]], B=[[1,2],[0,-1]]. Other inputs are square
-    real matrices of matching size. Return a tuple in the specified order.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P1 Q2: Derive the given M eigenpairs and verify Mv=lambda*v.
-# YOUR ANSWER HERE
-def eigensystem(M=None):
-    """Return (values, vectors) for real symmetric M (default [[2,-1],[-1,2]]).
-
-    Vectors are columns paired with values; order, sign, and nonzero scale
-    are free. Vectors must span each eigenspace, including repeated roots.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P1 Q3: Prove trace(AB)=trace(BA) for compatible matrices.
-# YOUR ANSWER HERE
-
-# P1 Q4: Show the given C is invertible, and compute its inverse step by step.
-# YOUR ANSWER HERE
-def matrix_inverse(C=None):
-    """Return inverse of nonsingular square C; default C=[[4,7],[2,6]]."""
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# PART 2 (50 points), Q1: Normalize c*3**k/k!, derive expectation and variance.
-# YOUR ANSWER HERE
-def distribution_moments(rate=3.):
-    """Return (c, mean, variance) for P(X=k)=c*rate**k/k!, k>=0, rate>0."""
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P2 Q2: Show reasoning for intersection, conditional, and union probabilities.
-# YOUR ANSWER HERE
-def event_probabilities(p_a=.5, p_b=.3, p_a_given_b=.6):
-    """Return (P(A intersect B), P(B|A), P(A union B)).
-
-    Inputs describe a valid distribution with p_a,p_b>0.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P2 Q3: Derive MLE/MAP for H,H,T,H,T, including the prior and maximization.
-# YOUR ANSWER HERE
-def coin_estimates(heads=3, tosses=5):
-    """Return (MLE, MAP) using prior density 2*theta on [0,1].
-
-    0<=heads<=tosses, positive integer tosses. Include boundary maxima.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P2 Q4: Derive both Gaussian MLEs for [1,3,5,7] step by step.
-# YOUR ANSWER HERE
-def gaussian_mle(data=None):
-    """Return (mean MLE, variance MLE); default data=[1,3,5,7].
-
-    Other inputs are finite 1D samples of length>=2 with nonzero variance.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P2 Q5: Derive the Gaussian posterior mode for the given observation/prior.
-# YOUR ANSWER HERE
-def gaussian_map(x=5., observation_variance=4., prior_mean=0., prior_variance=1.):
-    """Return posterior mode for one observation and a Gaussian mean prior.
-
-    Both variances are positive; inputs are variances, not standard deviations.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# P2 Q6: Prove Var(X)=E[X**2]-E[X]**2.
-# YOUR ANSWER HERE
-
-# PART 3 (30 points), Q1: Define covariance and derive Var(u.T@X)=u.T@Sigma@u.
-# YOUR ANSWER HERE
+import matplotlib.pyplot as plt
 
 # P3 Q2: Describe the Gaussian generator and observed correlation.
 # YOUR ANSWER HERE
+#  With 0 correlation, the dataset is an straight oval centered around the mean (because the deviation
+#  for feature 2 is twice that of 1). As the correlation increases negatively or positively,
+#  the oval skews diagonally and becomes thinner. This happens because as the two features become
+#  more correlated, they pin down each others values to a smaller range. See the pdf for the plots.
+
 def generate_data(n_samples=500, seed=0, mean=None, covariance=None):
     """Return reproducible Gaussian samples (n_samples,2) using NumPy and seed.
-
-    Defaults: mean=[2,-1], covariance=[[3,1.2],[1.2,1]]. Custom mean has shape
-    (2,), covariance (2,2) is positive definite. Do not mutate input arrays.
     """
     # YOUR CODE HERE
-    raise NotImplementedError()
+    rng = np.random.default_rng(1)
 
+    # Center the mean of the two features at the origin
+    mean = np.array([0, 0])
+
+    # standard deviation of the two features, feature 2 is twice as spread out
+    sigma1, sigma2 = 1.0, 2.0
+
+    # Correlation coefficient, positive means when one goes up the other goes up
+    rho = 0.8
+
+    # Covariance matrix
+    cov = np.array([
+        [sigma1 ** 2, rho * sigma1 * sigma2],
+        [rho * sigma1 * sigma2, sigma2 ** 2]
+    ])
+
+    n = 200
+
+    datasets = {}
+    for rho in [-0.8, 0.0, 0.5, 0.8, 0.95]:
+        cov = np.array([[sigma1 ** 2, rho * sigma1 * sigma2],
+                        [rho * sigma1 * sigma2, sigma2 ** 2]])
+        datasets[rho] = rng.multivariate_normal(mean, cov, size=n)
+
+    fig, axes = plt.subplots(1, 5, figsize=(20, 4), sharex=True, sharey=True)
+
+    lim = 8
+
+    for ax, (rho, X) in zip(axes, datasets.items()):
+        ax.scatter(X[:, 0], X[:, 1], s=10, alpha=0.5)
+        ax.set_title(f"ρ = {rho}")
+        ax.set_xlabel("Feature 1")
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+        ax.set_aspect("equal")
+
+    axes[0].set_ylabel("Feature 2")
+    plt.tight_layout()
+    plt.show()
 
 # P3 Q3: Link centering/covariance/eigendecomposition to the derivation and explain the plot.
 # YOUR ANSWER HERE
-def pca(X):
-    """Fit NumPy PCA without mutating finite X of shape (n,2), n>=2.
-
-    Return dict: mean (2,), centered (n,2), covariance (2,2), eigenvalues (2,),
-    components (2,2), scores (n,2). Use covariance divisor n-1, descending
-    eigenvalues, orthonormal eigenvectors as columns, scores=centered@components.
-    Signs/tied-eigenspace bases are free. Include rank-deficient and tied cases.
-    NumPy eigh/SVD are allowed; fitted library PCA is not.
+def pca(X=None):
     """
-    # YOUR CODE HERE
-    raise NotImplementedError()
+    Links to the Q1 derivation:
+        Var(u^T X) = u^T Sigma u
+        maximize u^T Sigma u  subject to  u^T u = 1
+        -> Lagrangian gives  Sigma u = lambda u
+        -> optimal u are eigenvectors of Sigma, and the variance along each equals its eigenvalue.
+    """
+
+    # Dataset
+    if not X:
+        rng = np.random.default_rng(42)
+        true_cov = np.array([[3.0, 2.0],
+                             [2.0, 2.0]])  # positive covariance -> tilted ellipse
+        X = rng.multivariate_normal(mean=[5.0, 3.0], cov=true_cov, size=300)  # shape (n, p)
+    n, p = X.shape
+
+    # ---------------------------------------------------------------
+    # STEP 1: Center the data (subtract the mean of each column)
+    # Q1 link: the derivation works with (X - mu). Centering makes the
+    # data cloud sit at the origin so projections measure deviation from the mean.
+    # ---------------------------------------------------------------
+    mu = X.mean(axis=0)
+    X_centered = X - mu
+
+    # ---------------------------------------------------------------
+    # STEP 2: Covariance matrix
+    # Q1 link: Sigma = E[(X - mu)(X - mu)^T]. With n samples (rows) this is
+    # the average of outer products, written compactly as Xc^T Xc / (n - 1).
+    # ---------------------------------------------------------------
+    cov = (X_centered.T @ X_centered) / (n - 1)
+
+    # ---------------------------------------------------------------
+    # STEP 3: Eigenvalues and eigenvectors
+    # Q1 link: maximizing u^T Sigma u with u^T u = 1 gives Sigma u = lambda u.
+    # eigh is for symmetric matrices (covariance is symmetric); it returns
+    # eigenvalues in ascending order and eigenvectors as COLUMNS.
+    # ---------------------------------------------------------------
+    eigvals, eigvecs = np.linalg.eigh(cov)
+
+    # ---------------------------------------------------------------
+    # STEP 4: Sort by eigenvalue (largest first) and select top k components
+    # Q1 link: variance along eigenvector v_i is v_i^T Sigma v_i = lambda_i,
+    # so the biggest eigenvalue = direction with the most spread = PC1.
+    # ---------------------------------------------------------------
+    order = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order]
+    eigvecs = eigvecs[:, order]
+
+    k = 1
+    components = eigvecs[:, :k]  # shape (p, k)
+    explained_ratio = eigvals / eigvals.sum()
+
+    # Project the centered data onto the chosen components
+    X_projected = X_centered @ components  # shape (n, k)
+
+    # ---------------------------------------------------------------
+    # Verify the Q1 result numerically: Var(u^T X) = u^T Sigma u = lambda
+    # ---------------------------------------------------------------
+    for i in range(p):
+        u = eigvecs[:, i]
+        proj = X_centered @ u
+        print(f"PC{i + 1}: eigenvalue = {eigvals[i]:.4f} | "
+              f"u^T Sigma u = {u @ cov @ u:.4f} | "
+              f"sample var of projection = {proj.var(ddof=1):.4f} | "
+              f"explained = {explained_ratio[i]:.1%}")
+    print("\nEigenvectors (columns = PC1, PC2):\n", eigvecs)
+
+    # ---------------------------------------------------------------
+    # Visualization
+    # ---------------------------------------------------------------
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+
+    # (a) original data with principal component directions
+    ax = axes[0]
+    ax.scatter(X[:, 0], X[:, 1], alpha=0.35, s=14, label="data")
+    ax.scatter(*mu, color="black", zorder=5, label="mean")
+    colors = ["crimson", "darkorange"]
+    for i in range(p):
+        # arrow length = 2 * sqrt(eigenvalue) = 2 standard deviations along that PC
+        vec = 2 * np.sqrt(eigvals[i]) * eigvecs[:, i]
+        ax.annotate("", xy=mu + vec, xytext=mu,
+                    arrowprops=dict(arrowstyle="->", color=colors[i], lw=2.5))
+        ax.plot([], [], color=colors[i], lw=2.5,
+                label=f"PC{i + 1} ({explained_ratio[i]:.0%} of variance)")
+    ax.set_title("Original data with principal component directions")
+    ax.set_xlabel("Measurement 1")
+    ax.set_ylabel("Measurement 2")
+    ax.set_aspect("equal", adjustable="datalim")
+    ax.legend()
+    ax.grid(alpha=0.3)
+
+    # (b) data expressed in PC coordinates (rotated so PCs are the axes)
+    ax = axes[1]
+    scores = X_centered @ eigvecs  # all components, for plotting
+    ax.scatter(scores[:, 0], scores[:, 1], alpha=0.35, s=14)
+    ax.axhline(0, color="gray", lw=0.8)
+    ax.axvline(0, color="gray", lw=0.8)
+    ax.set_title("Data in principal component coordinates")
+    ax.set_xlabel("PC1 score")
+    ax.set_ylabel("PC2 score")
+    ax.set_aspect("equal", adjustable="datalim")
+    ax.grid(alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+
+
+# P3 Q4:  Compute the proportion of total variance explained by each principal component.
+# YOUR ANSWER HERE
+
+# PC1: eigenvalue = 4.5485 | u^T Sigma u = 4.5485 | sample var of projection = 4.5485 | explained = 92.2%
+# PC2: eigenvalue = 0.3873 | u^T Sigma u = 0.3873 | sample var of projection = 0.3873 | explained = 7.8%
+#
+# Eigenvectors (columns = PC1, PC2):
+#  [[-0.81654063  0.57728796]
+#  [-0.57728796 -0.81654063]]
+#
+### --------
 
 
 # P3 Q4: Interpret the variance fractions and dimensionality reduction tradeoff.
 # YOUR ANSWER HERE
+# PC1 explains 92.2% of the total variance and PC2 only 7.8%, because the strong
+# correlation between the two measurements makes the data a thin, tilted ellipse
+# that one direction describes well. Dimensionality reduction exploits this redundancy
+# to compress data, reduce noise, and simplify visualization and modeling.
+# The trade-off is that each dropped component saves a dimension but loses variance
+# equal to its eigenvalue: keeping only PC1 halves the dimensions at a cost of 7.8% of
+# the variance, which is worthwhile if that loss is tolerable.
+
 def explained_variance(eigenvalues):
     """Return same-shape fractions for nonnegative eigenvalues with positive sum."""
     # YOUR CODE HERE
-    raise NotImplementedError()
+    eigenvalues = np.asarray(eigenvalues, dtype=float)
+    if not np.all(eigenvalues >= 0):
+        raise ValueError("eigenvalues must be nonnegative")
+    total = eigenvalues.sum()
+    if total <= 0:
+        raise ValueError("eigenvalues must have a positive sum")
+    return eigenvalues / total
 
-
-# P3 Q2/Q3/Q4: Provide labeled figures and discuss their meaning.
-# YOUR ANSWER HERE
-def make_plots(X, result):
-    """Return a Matplotlib Figure (or sequence of Figures), without show/save.
-
-    Plot samples and principal directions through their mean, and explained
-    variance fractions. Label axes. Plot quality is manually reviewed.
-    """
-    # YOUR CODE HERE
-    raise NotImplementedError()
-
-
-# REFLECTION: contributions, tasks completed, and external resources used.
-# YOUR ANSWER HERE
 
 if __name__ == '__main__':
     # YOUR CODE HERE: call your functions and save/display the requested figures.
     # This block does not run when the grader imports your functions.
-    pass
+    generate_data()
+    pca()
